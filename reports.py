@@ -140,17 +140,34 @@ def valuebystore(data):
 
     totals = [0] * len(stores)
     streams = [0] * len(stores)
-    plots = range(len(stores))
 
     for period in data:
         for sale in period.sales:
             if sale.method == 'Streaming':
-                for i in plots:
+                for i in range(len(stores)):
                     if sale.store == stores[i]:
                         totals[i] += sale.total
                         streams[i] += sale.units
                         break
 
+    cloud = 0
+    unlimited = 0
+
+    for i in range(len(stores)):
+        if stores[i] == 'Amazon Cloud':
+            cloud = i
+            stores[i] = 'Amazon'
+        elif stores[i] == 'Amazon Unlimited':
+            unlimited = i
+        elif stores[i] == 'YouTube Music Key':
+            stores[i] = 'YouTube'
+
+    totals[cloud] += totals[unlimited]
+
+    for i in sorted([unlimited], reverse=True):
+        del stores[i], totals[i]
+
+    plots = range(len(stores))
     values = [totals[i] / streams[i] for i in plots]
     sort = sorted(zip(values, stores), reverse=True)
     values = [value for value, store in sort]
